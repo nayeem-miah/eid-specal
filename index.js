@@ -79,14 +79,12 @@ app.use(cookieParser());
             secure: process.env.NODE_ENV === "production",
             sameSite: "strict",
           })
-          // console.log(user);
-          res.send({user})
+          
           res.json({
             message: "Login successful!",
             user: {_id: user._id , name : user.username,email : user.email}
           });
-
-
+          
         } catch (error) {
           console.log(error);
           res.status(500).json({ error: error.message });
