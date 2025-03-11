@@ -10,8 +10,8 @@ const bcrypt = require("bcryptjs");
 
 // Middleware
 app.use(cors({
-  origin: "http://localhost:5173", // Update with your frontend URL
-  credentials: true, // Allow sending cookies
+  origin: "http://localhost:5173", 
+  credentials: true, 
 }));
 app.use(express.json());
 app.use(cookieParser());
@@ -58,38 +58,46 @@ app.use(cookieParser());
     }
     });
 
-      // login route
+     // Login route
       app.post('/api/auth/login', async (req, res) => {
         try {
-          const { email, password } = req.body;
-          // console.log(email, "email");
-          const user = await userCollection.findOne({email})
-          // console.log(user, "user");
-          if (!user) {
-            return res.status(400).json({message: "user not found!"})
-          }
-         
-          const isMatch = await bcrypt.compare(password, user.password)
-          if (!isMatch) return res.status(400).json({ message: "Invalid password!" });
-          
-        //  token
-          const token = jwt.sign({ user_id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" })
-          res.cookie("token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-          })
-          
-          res.json({
-            message: "Login successful!",
-            user: {_id: user._id , name : user.username,email : user.email}
-          });
-          
+            const { email, password } = req.body;
+            const user = await userCollection.findOne({ email });
+
+            if (!user) {
+                return res.status(400).json({ message: "User not found!" });
+            }
+
+            const isMatch = await bcrypt.compare(password, user.password);
+            if (!isMatch) return res.status(400).json({ message: "Invalid password!" });
+
+            // Token generation 
+            const token = jwt.sign(
+                { 
+                    user_id: user._id,
+                    username: user.username, 
+                    email: user.email,
+                },
+                process.env.JWT_SECRET,
+                { expiresIn: "1d" }
+            );
+
+            res.cookie("token", token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "strict",
+            });
+
+            res.json({
+                message: "Login successful!",
+                user: { _id: user._id, username: user.username, email: user.email }
+            });
         } catch (error) {
-          console.log(error);
-          res.status(500).json({ error: error.message });
+            console.log(error);
+            res.status(500).json({ error: error.message });
         }
-      })
+      });
+
 
 
       // logout
@@ -98,18 +106,29 @@ app.use(cookieParser());
         // console.log("success logout");
         res.json({message: "logout successfully🙌"})
       })
-      // protected route
-      app.get("/api/auth/protected", (req, res) => {
-        const token = req.cookies.token;
-        // console.log(token);
-        if (!token) return res.status(401).json({ message: "Unauthorized access" })
-        jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-          if (err) return res.status(401).json({ message: "invalid token" });
-          // console.log("success login");
-          res.json({message : "welcome to my protected route!", userId: decoded.userId})
-        })
-    });
+     // Protected route to check authentication
+    app.get("/api/auth/protected", (req, res) => {
+      const token = req.cookies.token; 
+      if (!token) {
+          return res.status(401).json({ message: "Unauthorized" });
+      }
 
+      // Verify the token
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+          if (err) {
+              return res.status(401).json({ message: "Invalid token" });
+          }
+          
+          res.json({
+              message: "User is authenticated",
+              user: {
+                  user_id: decoded.user_id,    
+                  username: decoded.username,   
+                  email: decoded.email,         
+              }
+          });
+      });
+    });
 
 
       // Send a ping to confirm a successful connection
