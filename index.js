@@ -20,8 +20,8 @@ app.use(cookieParser());
 
 
 // MONGODB
-  const uri ='mongodb://localhost:27017'
-  // const uri =`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.bomlehy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+  // const uri ='mongodb://localhost:27017'
+  const uri =`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.bomlehy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
   // Create a MongoClient with a MongoClientOptions object to set the Stable API version
   const client = new MongoClient(uri, {
@@ -37,6 +37,7 @@ app.use(cookieParser());
       // Connect the client to the server	(optional starting in v4.7)
       // await client.connect();
       const userCollection = client.db("eidSpecial").collection("users");
+      const clothCollection = client.db("eidSpecial").collection("cloths");
 
      // **🔹 Signup API**
     app.post("/api/auth/signup", async (req, res) => {
@@ -129,6 +130,13 @@ app.use(cookieParser());
           });
       });
     });
+      
+      
+    app.get('/cloths', async(req, res)=>{
+      const result = await clothCollection.find().toArray();
+      console.log(result);
+      res.send(result);
+    })
 
 
       // Send a ping to confirm a successful connection
