@@ -155,6 +155,20 @@ app.use(cookieParser());
         const result = await cartCollection.insertOne(cart);
         res.send(result);
       })
+      // get all added product
+      app.get('/carts', async (req, res) => {
+        const result = await cartCollection.find().toArray();
+        res.send(result);
+      })
+      
+      // get single added product
+      app.get('/cart/:email', async (req, res) => {
+        const email = req.params.email;
+        const query = { email: email };
+        const result = await cartCollection.find(query).toArray();
+        console.log(result);
+        res.send(result);
+      })
 
 
       // Send a ping to confirm a successful connection
