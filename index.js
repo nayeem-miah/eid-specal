@@ -3,7 +3,7 @@ const cors = require("cors");
 const app = express();
 const port = process.env.PORT || 5000;
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken');
 const cookieParser = require("cookie-parser");
 const bcrypt = require("bcryptjs");
@@ -137,6 +137,15 @@ app.use(cookieParser());
       console.log(result);
       res.send(result);
     })
+      
+      // get single cloth
+      app.get('/single-product/:id', async (req, res) => {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await clothCollection.findOne(query);
+        // console.log(result);
+        res.send(result);
+      })
 
 
       // Send a ping to confirm a successful connection
