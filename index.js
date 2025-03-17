@@ -20,8 +20,8 @@ app.use(cookieParser());
 
 
 // MONGODB
-  // const uri ='mongodb://localhost:27017'
-  const uri =`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.bomlehy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+  const uri ='mongodb://localhost:27017'
+  // const uri =`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.bomlehy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
   // Create a MongoClient with a MongoClientOptions object to set the Stable API version
   const client = new MongoClient(uri, {
@@ -38,6 +38,7 @@ app.use(cookieParser());
       // await client.connect();
       const userCollection = client.db("eidSpecial").collection("users");
       const clothCollection = client.db("eidSpecial").collection("cloths");
+      const cartCollection = client.db("eidSpecial").collection("addToCart");
 
      // **🔹 Signup API**
     app.post("/api/auth/signup", async (req, res) => {
@@ -134,7 +135,7 @@ app.use(cookieParser());
       
     app.get('/cloths', async(req, res)=>{
       const result = await clothCollection.find().toArray();
-      console.log(result);
+      // console.log(result);
       res.send(result);
     })
       
@@ -144,6 +145,14 @@ app.use(cookieParser());
         const query = { _id: new ObjectId(id) };
         const result = await clothCollection.findOne(query);
         // console.log(result);
+        res.send(result);
+      })
+
+      // add to cart product
+      app.post('/carts', async (req, res) => {
+        const cart = req.body;
+        console.log(cart);
+        const result = await cartCollection.insertOne(cart);
         res.send(result);
       })
 
