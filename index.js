@@ -133,8 +133,16 @@ app.use(cookieParser());
     });
       
       
-    app.get('/cloths', async(req, res)=>{
-      const result = await clothCollection.find().toArray();
+      app.get('/cloths', async (req, res) => {
+        const search = req.query.search || "";
+        const query = {
+          $or: [
+            { name: { $regex: search, $options: "i" } },
+            { brand: { $regex: search, $options: "i" } },
+            { category: { $regex: search, $options: "i" } },
+          ],
+        };
+      const result = await clothCollection.find(query).toArray();
       // console.log(result);
       res.send(result);
     })
@@ -151,7 +159,7 @@ app.use(cookieParser());
       // add to cart product
       app.post('/carts', async (req, res) => {
         const cart = req.body;
-        console.log(cart);
+        // console.log(cart);
         const result = await cartCollection.insertOne(cart);
         res.send(result);
       })
@@ -166,7 +174,7 @@ app.use(cookieParser());
         const email = req.params.email;
         const query = { email: email };
         const result = await cartCollection.find(query).toArray();
-        console.log(result);
+        // console.log(result);
         res.send(result);
       })
 
