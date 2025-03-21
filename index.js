@@ -60,45 +60,47 @@ app.use(cookieParser());
     }
     });
 
-     // Login route
-      app.post('/api/auth/login', async (req, res) => {
-        try {
-            const { email, password } = req.body;
-            const user = await userCollection.findOne({ email });
-
-            if (!user) {
-                return res.status(400).json({ message: "User not found!" });
-            }
-
-            const isMatch = await bcrypt.compare(password, user.password);
-            if (!isMatch) return res.status(400).json({ message: "Invalid password!" });
-
-            // Token generation 
-            const token = jwt.sign(
-                { 
-                    user_id: user._id,
-                    username: user.username, 
-                    email: user.email,
-                },
-                process.env.JWT_SECRET,
-                { expiresIn: "1d" }
-            );
-
-            res.cookie("token", token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: "strict",
-            });
-
-            res.json({
-                message: "Login successful!",
-                user: { _id: user._id, username: user.username, email: user.email }
-            });
-        } catch (error) {
-            console.log(error);
-            res.status(500).json({ error: error.message });
-        }
-      });
+    app.post('/api/auth/login', async (req, res) => {
+      try {
+          const { email, password } = req.body;
+          const user = await userCollection.findOne({ email });
+  
+          if (!user) {
+              return res.status(400).json({ message: "User not found!" });
+          }
+  
+          const isMatch = await bcrypt.compare(password, user.password);
+          if (!isMatch) {
+              return res.status(400).json({ message: "Password does not match!" });
+          }
+  
+          // Token generation 
+          const token = jwt.sign(
+              { 
+                  user_id: user._id,
+                  username: user.username, 
+                  email: user.email,
+              },
+              process.env.JWT_SECRET,
+              { expiresIn: "1d" }
+          );
+  
+          res.cookie("token", token, {
+              httpOnly: true,
+              secure: process.env.NODE_ENV === "production",
+              sameSite: "strict",
+          });
+  
+          res.json({
+              message: "Login successful!",
+              user: { _id: user._id, username: user.username, email: user.email }
+          });
+      } catch (error) {
+          console.error("Login Error:", error);
+          res.status(500).json({ message: "Internal server error!" });
+      }
+  });
+  
 
 
 
