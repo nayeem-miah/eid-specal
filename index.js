@@ -133,20 +133,23 @@ app.use(cookieParser());
     });
       
       
-      app.get('/cloths', async (req, res) => {
-        const search = req.query.search || "";
-        const query = {
-          $or: [
-            { name: { $regex: search, $options: "i" } },
-            { brand: { $regex: search, $options: "i" } },
-            { category: { $regex: search, $options: "i" } },
-          ],
-        };
+    app.get('/cloths', async (req, res) => {
+      const search = req.query.search || "";
+  
+      const query = search
+          ? {
+              $or: [
+                  { name: { $regex: search, $options: "i" } },
+                  { brand: { $regex: search, $options: "i" } },
+                  { category: { $regex: search, $options: "i" } },
+              ],
+          }
+          : {}; 
+  
       const result = await clothCollection.find(query).toArray();
-      // console.log(result);
       res.send(result);
-    })
-      
+  });
+  
       // get single cloth
       app.get('/single-product/:id', async (req, res) => {
         const id = req.params.id;
